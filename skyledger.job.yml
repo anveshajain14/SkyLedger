@@ -1,0 +1,43 @@
+resources:
+  jobs:
+    skyledger_daily_pipeline:
+      name: skyledger daily pipeline
+      tasks:
+        - task_key: Bronze
+          notebook_task:
+            notebook_path: /Workspace/Users/jainanvesha14@gmail.com/SkyLedger/01_bronze_ingestion
+            source: WORKSPACE
+          max_retries: 2
+          min_retry_interval_millis: 0
+          disable_auto_optimization: true
+        - task_key: Silver
+          depends_on:
+            - task_key: Bronze
+          notebook_task:
+            notebook_path: /Workspace/Users/jainanvesha14@gmail.com/SkyLedger/02_silver_cleaning
+            source: WORKSPACE
+          max_retries: 1
+          min_retry_interval_millis: 0
+          disable_auto_optimization: true
+        - task_key: Gold
+          depends_on:
+            - task_key: Silver
+          notebook_task:
+            notebook_path: /Workspace/Users/jainanvesha14@gmail.com/SkyLedger/03_gold_builts
+            source: WORKSPACE
+          min_retry_interval_millis: 900000
+          disable_auto_optimization: true
+        - task_key: Data_quality_check
+          depends_on:
+            - task_key: Gold
+          notebook_task:
+            notebook_path: /Workspace/Users/jainanvesha14@gmail.com/SkyLedger/04_data_quatilty_check
+            source: WORKSPACE
+          min_retry_interval_millis: 900000
+          disable_auto_optimization: true
+      queue:
+        enabled: true
+      parameters:
+        - name: catalog
+          default: sky_dev
+      performance_target: PERFORMANCE_OPTIMIZED
